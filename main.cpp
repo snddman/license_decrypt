@@ -41,6 +41,70 @@ int main() {
         return 1;
     }
 
+    // read public key from BIO
+    RSA* rsa = PEM_read_bio_RSA_PUBKEY(bio, nullptr, nullptr, nullptr);
+    if (!rsa)
+    {
+        cerr << "Failed to read RSA public key." << endl;
+        BIO_free(bio);
+        delete[] buffer;
+        return 1;
+    }
 
+    // print rsa key parameters
+    cout << "RSA Key Parameters:" << endl;
+    const BIGNUM* n, *e;
+    RSA_get0_key(rsa, &n, &e, nullptr);
+    cout << "Modulus (n): '" << BN_bn2hex(n) << "';" << endl;
+    cout << "Exponent (e): '" << BN_bn2hex(e) << "';" << endl;
+    cout << endl;
+
+    // try to verify the license file
+    unsigned char* from = (unsigned char*)buffer;
+    unsigned char to[256];
+    string txt = "";
+
+    cout << "Start encryption license file..." << endl;
+    if (size % 256 != 0) {
+        cerr << "License file size is not a multiple of 256 bytes." << endl;
+        RSA_free(rsa);
+        BIO_free(bio);
+        delete[] buffer;
+        return 1;
+    } else {
+        int total_decrypted = 0;
+        bool decrypt_sucess = true;
+        while (total_decrypted < size) {
+            int len = RSA_public_decrypt(256, from, to, rsa, RSA_PKCS1_PADDING);
+            if (len < 0) {
+                cerr << "RSA_public_decrypt failed: " << ERR_error_string(ERR_get_error(), nullptr) << endl;
+                decrypt_sucess = false;
+                break;
+            }
+
+            txt.append(string((char*)to, len));
+            from += 256;
+            total_decrypted += 256;
+        }
+    }
+    if (!decrypt_sucess) {
+        cout << "Failed to decrypt the license file." << endl;
+        RSA_free(rsa);
+        BIO_free(bio);
+        delete[] buffer;
+        return 1;
+    }
+
+    cout << "Decrypted license file content:" << endl;
+    cout << "==========================================" << endl;
+    cout << txt << endl;
+    cout << "==========================================" << endl;
+
+
+
+    // Clean resources
+    delete[] buffer;
+    RSA_free(rsa);
+    BIO_free(bio);
     return 0;
 }
