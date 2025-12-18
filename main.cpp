@@ -100,7 +100,23 @@ int main() {
     cout << txt << endl;
     cout << "==========================================" << endl;
 
+    // Parse license content
+    cout << "Parsing license content..." << endl;
+    size_t pos = 0;
+    while (pos < txt.length()) {
+        size_t eq_pos = txt.find('=', pos);
+        if (eq_pos == string::npos) break;
 
+        size_t next_pos = txt.find(' ', eq_pos);
+        if (next_pos == string::npos) next_pos = txt.length();
+
+        string key = txt.substr(pos, eq_pos - pos);
+        string value = txt.substr(eq_pos + 1, next_pos - (eq_pos + 1));
+
+        cout << key << " = " << value << endl;
+        pos = next_pos;
+        while (pos < txt.length() && txt[pos] == ' ') pos++;
+    }
 
     // Clean resources
     delete[] buffer;
