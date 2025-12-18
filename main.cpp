@@ -107,14 +107,14 @@ int main() {
         size_t eq_pos = txt.find('=', pos);
         if (eq_pos == string::npos) break;
 
-        size_t next_pos = txt.find(' ', eq_pos);
+        size_t next_pos = txt.find('&', eq_pos);
         if (next_pos == string::npos) next_pos = txt.length();
 
         string key = txt.substr(pos, eq_pos - pos);
         string value = txt.substr(eq_pos + 1, next_pos - (eq_pos + 1));
 
         cout << key << " = " << value << endl;
-        pos = next_pos;
+        pos = next_pos + 1;
         while (pos < txt.length() && txt[pos] == ' ') pos++;
     }
 
