@@ -63,6 +63,7 @@ int main() {
     unsigned char* from = (unsigned char*)buffer;
     unsigned char to[256];
     string txt = "";
+    bool decrypt_sucess = true;
 
     cout << "Start encryption license file..." << endl;
     if (size % 256 != 0) {
@@ -73,7 +74,6 @@ int main() {
         return 1;
     } else {
         int total_decrypted = 0;
-        bool decrypt_sucess = true;
         while (total_decrypted < size) {
             int len = RSA_public_decrypt(256, from, to, rsa, RSA_PKCS1_PADDING);
             if (len < 0) {
